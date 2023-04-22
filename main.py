@@ -41,40 +41,10 @@ def get_product_name_state(product_url):
             product_name = soup.find(id="products_maintitle").getText()
             state = soup.find(id='js_buyBoxMain').getText()
             return [product_name, state]
-        
-@tasks.loop(seconds=10)#2分毎
-async def send_message():
-    data = [] #[[url, guild_id, user_id], [][]...]二次元配列
-    #txtファイルの全ての行のurl文ループするfor文で、在庫があればそのguildのuserにDMを送る
-    with open('product_and_user.txt', mode='r') as f:
-    # ファイルの各行を1つずつ読み込んでリストに格納
-        lines = f.readlines()
-        # 各行を半角スペースで区切って、二次元配列に要素を追加
-        for line in lines:
-            # 改行文字を除去して、半角スペースで区切る
-            items = line.rstrip().split(' ')
-            # 二次元配列に要素を追加
-            data.append(items)
-    f.close()
-    for i in range(len(data)):
-        pro_data_list = get_product_name_state(data[i][0])
-        #print(pro_data_list) #[商品名, 状態]
-        if 'カート' in pro_data_list[1]:
-            #print(data) #[[リンク, ギルドid, ユーザid], [], []...]
-            # guildオブジェクトを取得
-            guild = discord.utils.find(lambda g: g.id == int(data[i][1]), client.guilds)
-            print(guild)
-            member = guild.get_member(int(data[i][2]))
-            embed = discord.Embed(title = "商品が入荷しました！", 
-                    description = str(pro_data_list[0]) + 'が入荷しました！' , color = 0xf96fa6)
-            
-            await member.send(embed=embed) #rs
-
 
 @client.event
 async def on_ready(): #botログイン完了時に実行
     print('on_ready') 
-    send_message.start() # タスクの開始
 
 @client.tree.command(
     name='ヨドバシurl登録',
